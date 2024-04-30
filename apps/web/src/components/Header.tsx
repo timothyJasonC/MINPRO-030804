@@ -1,3 +1,7 @@
 export const Header = () => {
-  return <div>Header</div>;
+  return (
+    <div>
+      <h1>Ini header</h1>
+    </div>
+  )
 };
