@@ -10,12 +10,53 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Sample {
-  id        Int      @id @default(autoincrement())
-  name      String
-  code      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model User {
+  id          Int        @id @default(autoincrement())
+  username    String     @unique
+  email       String     @unique
+  password    String
+  image       String?    @db.LongText
+  isActive    Boolean    @default(false)
+  isOrganizer Boolean    @default(false)
+  referral    Referral?
+  Point       Points[]
+  Discount    Discount[]
+  Event       Event[]
+}
 
-  @@map("samples") // if you want to use snake_case format
+model Referral {
+  id           Int    @id @default(autoincrement())
+  referralCode String @unique
+  user         User   @relation(fields: [userId], references: [id])
+  userId       Int    @unique
+}
+
+model Points {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  amount          Int
+  exprirationDate DateTime
+  user            User     @relation(fields: [userId], references: [id])
+}
+
+model Discount {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  discount        Int
+  exprirationDate DateTime
+  user            User     @relation(fields: [userId], references: [id])
+}
+
+model Event {
+  id            Int      @id @default(autoincrement())
+  description   String
+  location      String
+  imageUrl      String   @db.LongText
+  startDateTime DateTime
+  endDateTime   DateTime
+  price         Int
+  isFree        Boolean  @default(false)
+  category      String
+  organizerId   Int
+  user          User     @relation(fields: [organizerId], references: [id])
 }

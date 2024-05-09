@@ -9,7 +9,7 @@ import express, {
 } from 'express';
 import cors from 'cors';
 import { PORT } from './config';
-import { SampleRouter } from './routers/sample.router';
+import { ApiRouter } from './routers/api.router';
 
 export default class App {
   private app: Express;
@@ -23,8 +23,9 @@ export default class App {
 
   private configure(): void {
     this.app.use(cors());
-    this.app.use(json());
-    this.app.use(urlencoded({ extended: true }));
+    this.app.use(json({ limit: "10mb" }));
+    this.app.use(urlencoded({ limit: "10mb", extended: true }));
+    this.app.use('/public', express.static("public"))
   }
 
   private handleError(): void {
@@ -51,13 +52,13 @@ export default class App {
   }
 
   private routes(): void {
-    const sampleRouter = new SampleRouter();
+    const apiRouter = new ApiRouter()
 
     this.app.get('/', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student !`);
     });
 
-    this.app.use('/samples', sampleRouter.getRouter());
+    this.app.use('/api', apiRouter.getRouter())
   }
 
   public start(): void {
