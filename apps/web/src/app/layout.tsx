@@ -4,6 +4,7 @@ import './globals.css';
 import { Header } from '@/components/Header';
 import Footer from '@/components/Footer';
 import { UserContextProvider } from './userContext';
+import { Toaster } from "@/components/ui/toaster"
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -31,6 +32,7 @@ export default function RootLayout({
           <Header />
           {children}
           <Footer />
+          <Toaster />
         </UserContextProvider>
       </body>
     </html>

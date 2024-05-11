@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form"
 import { userDefaultValues } from "@/constants"
 import Link from "next/link"
 import { userFormLoginSchema, userFormRegisterSchema } from "@/lib/validator"
-import { useRouter } from "next/navigation"
 import { useContext, useState } from "react"
 import { createToken } from "@/app/action"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -21,7 +20,6 @@ type UserFormProps = {
 }
 
 export default function UserForm({ type }: UserFormProps) {
-    const router = useRouter()
     const [error, setError] = useState("")
     const [alerts, setAlerts] = useState(false)
     const { setUserInfo } = useContext<any>(UserContext)
@@ -29,13 +27,14 @@ export default function UserForm({ type }: UserFormProps) {
     const form = useForm<z.infer<typeof userFormLoginSchema> | z.infer<typeof userFormRegisterSchema>>({
         resolver: zodResolver(type === "Register" ? userFormRegisterSchema : userFormLoginSchema),
         defaultValues: initialValues,
+        mode: "all"
     });
 
     // 2. Define a submit handler.
     async function onSubmit(values: z.infer<typeof userFormLoginSchema> | z.infer<typeof userFormRegisterSchema>) {
         if (type === "Register") {
             try {
-                const response = await fetch('http://localhost:8000/api/users/register', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/users/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(values)
@@ -55,7 +54,7 @@ export default function UserForm({ type }: UserFormProps) {
 
         if (type === "Login") {
             try {
-                const response = await fetch('http://localhost:8000/api/users/login', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/users/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(values)
@@ -74,10 +73,9 @@ export default function UserForm({ type }: UserFormProps) {
                 if (response.ok) {
                     localStorage.setItem('token', data.token)
                     createToken(data.token)
-                    setUserInfo(data.token)
+                    setUserInfo(data)
                     window.location.reload();
                     window.location.href = '/profile'
-                    // router.push('/profile')
                 }
             } catch (err) {
                 console.log(err);
@@ -173,7 +171,7 @@ export default function UserForm({ type }: UserFormProps) {
                 <Button type="submit">{type === "Register" ? 'Register' : "Login"}</Button>
                 <p className='text-red-600 text-[16px] mb-4 text-center'>{error && error}</p>
                 {type === "Login" ? (
-                    <p>Don't have an account? <Link href='/register' className="text-blue-700">Register</Link></p>
+                    <p>Don't have an account? <Link href='/register' className="text-blue-700">Register</Link>. <br /> <Link href='/verify/forget_password' className="underline">Forget password?</Link>.</p>
                 ) : (
                     <>
                         <p>Already have an account? <Link href='/login' className="text-blue-700">Login</Link></p>

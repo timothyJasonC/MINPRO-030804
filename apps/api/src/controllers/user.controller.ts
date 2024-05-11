@@ -44,7 +44,7 @@ export class UserController {
                 referall: referall || null
             }
             const token = sign(payload, process.env.KEY_JWT!, {})
-            const link = `http://localhost:3000/verify_as_user/${token}`
+            const link = `http://localhost:3000/verify/activate/${token}`
             const templatePath = path.join(__dirname, "../templates", "register.html")
             const templateSource = fs.readFileSync(templatePath, 'utf-8')
             const compiledTemplate = handlebars.compile(templateSource)
@@ -56,7 +56,7 @@ export class UserController {
             await transporter.sendMail({
                 from: process.env.MAIL_USER!,
                 to: createdUser?.email,
-                subject: "Verify as An Organizer",
+                subject: "Verify as User",
                 html
             })
 
@@ -158,6 +158,23 @@ export class UserController {
         }
     }
 
+    async keepLogin(req: Request, res: Response) {
+        try {
+            const user = await prisma.user.findUnique({
+                where: { id: req.user?.id },
+                select: {
+                    id: true, username: true
+                }
+            })
+            res.status(200).json(user)
+        } catch (error) {
+            res.status(400).json({
+                status: "error",
+                message: error
+            });
+        }
+    }
+
     async userProfile(req: Request, res: Response) {
         try {
             const user = await prisma.user.findUnique({
@@ -201,17 +218,51 @@ export class UserController {
                     id: req.user?.id
                 }
             })
+            let updateUser
+            if (user?.email !== req.body.email) {
+                updateUser = await prisma.user.update({
+                    where: {
+                        id: user?.id
+                    },
+                    data: {
+                        username: req.body.username,
+                        image: newPath ? newPath : user?.image
+                    }
+                })
 
-            const updateUser = await prisma.user.update({
-                where: {
-                    id: user?.id
-                },
-                data: {
-                    ...req.body,
-                    image: newPath ? newPath : user?.image
+                const payload = {
+                    id: user?.id,
+                    email: req.body.email
                 }
-            })
-            res.status(200).json(updateUser)
+                const token = sign(payload, process.env.KEY_JWT!, { expiresIn: '1h' })
+                const link = `http://localhost:3000/verify/update_email/${token}`
+                const templatePath = path.join(__dirname, "../templates", "updateEmail.html")
+                const templateSource = fs.readFileSync(templatePath, 'utf-8')
+                const compiledTemplate = handlebars.compile(templateSource)
+                const html = compiledTemplate({
+                    name: user?.username,
+                    link
+                })
+
+                await transporter.sendMail({
+                    from: process.env.MAIL_USER!,
+                    to: req.body.email,
+                    subject: "Update email confirmation",
+                    html
+                })
+                res.status(200).json({ status: "update email", email: req.body.email });
+            } else if (user?.email === req.body.email) {
+                updateUser = await prisma.user.update({
+                    where: {
+                        id: user?.id
+                    },
+                    data: {
+                        ...req.body,
+                        image: newPath ? newPath : user?.image
+                    }
+                })
+                res.status(200).json({ status: "user updated" });
+            }
         }
         catch (err) {
             res.status(400).json({
@@ -231,7 +282,7 @@ export class UserController {
                 id: user?.id
             }
             const token = sign(payload, process.env.KEY_JWT!, { expiresIn: '1h' })
-            const link = `http://localhost:3000/verify/${token}`
+            const link = `http://localhost:3000/verify/organizer/${token}`
             const templatePath = path.join(__dirname, "../templates", "verify.html")
             const templateSource = fs.readFileSync(templatePath, 'utf-8')
             const compiledTemplate = handlebars.compile(templateSource)
@@ -269,6 +320,89 @@ export class UserController {
                 status: 'ok',
                 message: 'Verify Account Success'
             })
+        } catch (err) {
+            res.status(400).json({
+                status: 'error',
+                message: err
+            })
+        }
+    }
+
+    async updateEmail(req: Request, res: Response) {
+        try {
+            const validate = await prisma.user.findUnique({
+                where: { email: req.user?.email }
+            })
+            if (validate) throw 'Email has been used with another account'
+            await prisma.user.update({
+                data: {
+                    email: req.user?.email
+                },
+                where: {
+                    id: req.user?.id
+                }
+            })
+            res.status(200).json({
+                status: 'ok',
+                message: 'Update Email Success'
+            })
+        } catch (err) {
+            res.status(400).json({
+                status: 'error',
+                message: err
+            })
+        }
+    }
+
+    async resetPassword(req: Request, res: Response) {
+        try {
+            const user = await prisma.user.findUnique({
+                where: { email: req.body.email }
+            })
+            if (!user) throw 'Account not found'
+            const payload = {
+                id: user?.id,
+                email: user?.email
+            }
+            const token = sign(payload, process.env.KEY_JWT!, { expiresIn: '1h' })
+            const link = `http://localhost:3000/verify/forget_password/update/${token}`
+            const templatePath = path.join(__dirname, "../templates", "resetPassword.html")
+            const templateSource = fs.readFileSync(templatePath, 'utf-8')
+            const compiledTemplate = handlebars.compile(templateSource)
+            const html = compiledTemplate({
+                name: user?.username,
+                link
+            })
+
+            await transporter.sendMail({
+                from: process.env.MAIL_USER!,
+                to: req.body.email,
+                subject: "Reset password confirmation",
+                html
+            })
+            res.status(200).json({status: 'ok', message: 'email sended'})
+        } catch (err) {
+            res.status(400).json({
+                status: 'error',
+                message: err
+            })
+        }
+    }
+
+    async updatePassword(req: Request, res: Response) {
+        try {
+            const {password, confirm} = req.body
+            if (password !== confirm) throw 'Invalid confirmation'
+            
+            const salt = await genSalt(10)
+            const hashPassword = await hash(password, salt)
+
+            await prisma.user.update({
+                data: {password: hashPassword},
+                where: { email: req.user?.email }
+            })
+
+            res.status(200).json({status: 'ok', message: 'User updated'})
         } catch (err) {
             res.status(400).json({
                 status: 'error',

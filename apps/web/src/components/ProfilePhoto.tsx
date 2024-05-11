@@ -33,9 +33,9 @@ export default function ProfilePhoto({ image, onFieldChange, setUploadedFile }: 
         <div className="mb-2">
             <label className="flex flex-col h-32 gap-1 w-32 mx-auto border rounded-full bg-transparent text-xl whitespace-nowrap text-gray-600">
                 {previewImage ? (
-                    <Image src={ previewImage} width={100} height={100} alt="Uploaded" className="w-32 h-32 object-cover rounded-full" />
+                    <Image src={ previewImage || `${process.env.NEXT_PUBLIC_BASE_API_URL}/${image}`} width={100} height={100} alt="Uploaded" className="w-32 h-32 object-cover rounded-full" />
                 ) : (
-                    <Image src={`http://localhost:8000/${image}` || "/images/user.png"} width={100} height={100} alt="" className="w-32 h-32 object-cover rounded-full" />
+                    <Image src={`${process.env.NEXT_PUBLIC_BASE_API_URL}/${image}` ||"/images/user.png"} width={100} height={100} alt="" className="w-32 h-32 object-cover rounded-full" />
                 )}
             </label>
             <div className="flex justify-between w-32 mx-auto mt-2">

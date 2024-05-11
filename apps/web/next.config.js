@@ -12,6 +12,9 @@ const nextConfig = {
           },
         ],
       },
+      env: {
+        BASE_URL: "https://sure-just-goat.ngrok-free.app"
+      }
 }
 
 module.exports = nextConfig

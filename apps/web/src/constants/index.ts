@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { boolean, number } from "zod"
 
 export const headerLinks = [
   {
@@ -28,3 +28,14 @@ export interface IDiscount {
   discount: number,
   exprirationDate: Date
 }
+export const eventDefaultValues = {
+  title: "",
+  description: "",
+  location: "",
+  imageUrl: "",
+  startDateTime: new Date(),
+  endDateTime: new Date(),
+  price: "",
+  isFree: false,
+  category: ""
+};

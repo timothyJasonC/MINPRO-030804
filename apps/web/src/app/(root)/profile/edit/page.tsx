@@ -9,10 +9,12 @@ import { Input } from "@/components/ui/input";
 import { userProfileSchema } from "@/lib/validator";
 import ProfilePhoto from "@/components/ProfilePhoto";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast"
 
 export default function Page() {
     const [file, setFile] = useState<File | null>(null);
     const router = useRouter()
+    const { toast } = useToast()
     const form = useForm<z.infer<typeof userProfileSchema>>({
         resolver: zodResolver(userProfileSchema),
         defaultValues: {
@@ -26,8 +28,9 @@ export default function Page() {
         const fetchUserData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:8000/api/users/profile', {
-                    method: 'GET',
+                // const response = await fetch('http://localhost:8000/api/users/profile', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/users/profile`, {
+                    method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                 });
                 const userData = await response.json();
@@ -43,7 +46,6 @@ export default function Page() {
     }, [form]);
 
     const onSubmit = async (data: z.infer<typeof userProfileSchema>) => {
-        // console.log(data);
         try {
             const token = localStorage.getItem('token')
             const formData = new FormData();
@@ -53,12 +55,23 @@ export default function Page() {
                 formData.set('file', file)
             }
             // console.log(formData);
-            const response = await fetch('http://localhost:8000/api/users/update', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/users/update`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
             })
-            if(response.ok) {
+            const info = await response.json()
+            if (info.status === "update email") {
+                toast({
+                    description: `We have send an email to ${info.email}, please confirm to update your email address`,
+                    className: "bg-primary-50 rounded-xl "
+                })
+                router.push('/profile')
+            } else if (info.status === "user updated") {
+                toast({
+                    description: "Your user profile has been updated.",
+                    className: "bg-primary-50 rounded-xl "
+                })
                 router.push('/profile')
             }
         } catch (error) {
@@ -74,7 +87,7 @@ export default function Page() {
                     name="image"
                     render={({ field }) => (
                         <FormItem className="w-full">
-                            <ProfilePhoto onFieldChange={field.onChange} image={field.value} setUploadedFile={setFile}/>
+                            <ProfilePhoto onFieldChange={field.onChange} image={field.value} setUploadedFile={setFile} />
                             <FormMessage />
                         </FormItem>
                     )}
