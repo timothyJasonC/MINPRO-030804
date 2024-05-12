@@ -54,7 +54,6 @@ export default function Page() {
             if (file) {
                 formData.set('file', file)
             }
-            // console.log(formData);
             const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/users/update`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` },

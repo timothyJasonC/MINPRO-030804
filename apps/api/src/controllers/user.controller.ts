@@ -7,6 +7,7 @@ import fs from "fs"
 import handlebars from "handlebars"
 import path from "path";
 import { transporter } from '@/helpers/nodemailer';
+import { User } from '@prisma/client';
 
 
 export class UserController {
@@ -16,6 +17,16 @@ export class UserController {
             const { username, email, password, referall } = req.body
             const salt = await genSalt(10)
             const hashPassword = await hash(password, salt)
+
+            const validateEmail = await prisma.user.findUnique({
+                where: {email: email}
+            })
+            const validateUser = await prisma.user.findUnique({
+                where: {username: username}
+            })
+
+            if (validateEmail) throw 'This email has been taken by another user, please change your email'
+            if (validateUser) throw 'This username has been taken by another user, please change your username'
 
             let createdUser
 

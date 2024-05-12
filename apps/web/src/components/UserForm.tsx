@@ -1,7 +1,7 @@
 "use client"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { useForm } from "react-hook-form"
@@ -10,8 +10,9 @@ import Link from "next/link"
 import { userFormLoginSchema, userFormRegisterSchema } from "@/lib/validator"
 import { useContext, useState } from "react"
 import { createToken } from "@/app/action"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { UserContext } from "@/app/userContext"
+import { useToast } from "@/components/ui/use-toast"
+
 
 
 
@@ -21,7 +22,8 @@ type UserFormProps = {
 
 export default function UserForm({ type }: UserFormProps) {
     const [error, setError] = useState("")
-    const [alerts, setAlerts] = useState(false)
+    const { toast } = useToast()
+
     const { setUserInfo } = useContext<any>(UserContext)
     const initialValues = userDefaultValues
     const form = useForm<z.infer<typeof userFormLoginSchema> | z.infer<typeof userFormRegisterSchema>>({
@@ -41,10 +43,36 @@ export default function UserForm({ type }: UserFormProps) {
                 });
                 const data = await response.json()
                 if (response.status === 200) {
-                    setAlerts(true)
+                    toast({
+                        title: "Registration successful, please activate your account",
+                        description: "Check your email to activate your account, after you activate your account, you can login!",
+                        className: "bg-primary-50 rounded-xl"
+                    })
                     setError("")
                 }
+                if (data.message === "This email has been taken by another user, please change your email") {
+                    toast({
+                        description: "This email has been taken by another user, please change your email",
+                        variant: "destructive",
+                        className: "rounded-xl"
+                    })
+                    setError("This email has been taken by another user, please change your email")
+                }
+                if (data.message === "This username has been taken by another user, please change your username") {
+                    toast({
+                        description: "This username has been taken by another user, please change your username",
+                        variant: "destructive",
+                        className: "rounded-xl"
+                    })
+                    setError("This username has been taken by another user, please change your username")
+                }
                 if (data.message === "Wrong referral code") {
+                    toast({
+                        title: "Wrong Referral Code",
+                        description: "Please input a valide reff code or you can clear the input of reff code",
+                        variant: "destructive",
+                        className: "rounded-xl"
+                    })
                     setError("Wrong Referral Code")
                 }
             } catch (err) {
@@ -62,15 +90,34 @@ export default function UserForm({ type }: UserFormProps) {
                 const data = await response.json()
                 console.log(response);
                 if (data.message === "User not found!") {
+                    toast({
+                        description: "User not found",
+                        variant: "destructive",
+                        className: "rounded-xl"
+                    })
                     setError("User Not Found")
                 }
                 if (data.message === "Not active") {
+                    toast({
+                        description: "Your accont hasn't been activate yet, activate it first at your email on your email",
+                        variant: "destructive",
+                        className: "rounded-xl"
+                    })
                     setError("Your accont hasn't been activate yet, activate it first at your email on your email")
                 }
                 if (data.message === "Wrong Password!") {
+                    toast({
+                        description: "Wrong password",
+                        variant: "destructive",
+                        className: "rounded-xl"
+                    })
                     setError("Wrong Password")
                 }
                 if (response.ok) {
+                    toast({
+                        description: "Login success",
+                        className: "bg-primary-50 rounded-xl"
+                    })
                     localStorage.setItem('token', data.token)
                     createToken(data.token)
                     setUserInfo(data)
@@ -175,14 +222,6 @@ export default function UserForm({ type }: UserFormProps) {
                 ) : (
                     <>
                         <p>Already have an account? <Link href='/login' className="text-blue-700">Login</Link></p>
-                        {alerts && (
-                            <Alert>
-                                <AlertTitle>Verification email has been send</AlertTitle>
-                                <AlertDescription>
-                                    Check your email to activate your account, after you activate your account, you can login!
-                                </AlertDescription>
-                            </Alert>
-                        )}
                     </>
                 )
 
