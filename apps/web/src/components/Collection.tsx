@@ -3,7 +3,7 @@ import Card from './Card'
 import { IDiscount } from '@/constants'
 
 type CollectionProps = {
-    data: IDiscount[]
+    data: IDiscount[] 
     emptyTitle: string,
     emptyStateSubtext: string,
     collectionType?: 'My_Promo' | "Events_Organized"
@@ -15,12 +15,13 @@ export default function Collection({
     emptyStateSubtext,
     collectionType
 }: CollectionProps) {
+    
     return (
         <section className='max-w-[380px] md:max-w-[800px] mx-auto'>
             {data && data.length > 0 ? (
                 <div className='flex flex-col items-center gap-10 mx-auto'>
                     <ul className='grid w-full grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:gap-10'>
-                        {data.map((item) => {
+                        {collectionType === "My_Promo" && data.map((item) => {
                             return (
                                 <li className='flex justify-center'>
                                     <Card item={item} />

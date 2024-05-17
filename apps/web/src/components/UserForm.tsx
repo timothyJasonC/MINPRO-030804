@@ -12,9 +12,7 @@ import { useContext, useState } from "react"
 import { createToken } from "@/app/action"
 import { UserContext } from "@/app/userContext"
 import { useToast } from "@/components/ui/use-toast"
-
-
-
+import { useRouter, useSearchParams } from "next/navigation"
 
 type UserFormProps = {
     type: "Register" | "Login"
@@ -23,6 +21,8 @@ type UserFormProps = {
 export default function UserForm({ type }: UserFormProps) {
     const [error, setError] = useState("")
     const { toast } = useToast()
+const search = useSearchParams()
+const redirect = search.get('redirect')||'/'
 
     const { setUserInfo } = useContext<any>(UserContext)
     const initialValues = userDefaultValues
@@ -114,15 +114,14 @@ export default function UserForm({ type }: UserFormProps) {
                     setError("Wrong Password")
                 }
                 if (response.ok) {
+                    // router.push('/profile')
                     toast({
                         description: "Login success",
                         className: "bg-primary-50 rounded-xl"
                     })
                     localStorage.setItem('token', data.token)
-                    createToken(data.token)
+                    createToken(data.token, redirect)
                     setUserInfo(data)
-                    window.location.reload();
-                    window.location.href = '/profile'
                 }
             } catch (err) {
                 console.log(err);

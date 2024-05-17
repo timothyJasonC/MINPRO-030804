@@ -22,6 +22,7 @@ model User {
   Point       Points[]
   Discount    Discount[]
   Event       Event[]
+  Order       Order[]
 }
 
 model Referral {
@@ -49,6 +50,7 @@ model Discount {
 
 model Event {
   id            Int      @id @default(autoincrement())
+  title         String
   description   String
   location      String
   imageUrl      String   @db.LongText
@@ -56,7 +58,27 @@ model Event {
   endDateTime   DateTime
   price         Int
   isFree        Boolean  @default(false)
-  category      String
+  categoryId    Int
   organizerId   Int
+  ticket        Int?
   user          User     @relation(fields: [organizerId], references: [id])
+  category      Category @relation(fields: [categoryId], references: [id])
+  Order         Order[]
+}
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  events Event[]
+}
+
+model Order {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  eventId     Int
+  totalAmount Int
+  createdAt   DateTime @default(now())
+  status      Boolean  @default(false)
+  event       Event    @relation(fields: [eventId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
 }

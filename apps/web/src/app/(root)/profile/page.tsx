@@ -4,21 +4,27 @@ import { UserContext } from "@/app/userContext"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useContext, useEffect, useState } from "react"
 import Cookies from 'js-cookie'
 import Collection from "@/components/Collection"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import EventCollection from "@/components/EventCollection"
 
 export default function page() {
   const { setUserInfo } = useContext<any>(UserContext)
   const [profile, setProfile] = useState<any>({})
+  const [event, setEvent] = useState<any>({})
   const [totalPoints, setTotalPoints] = useState<number>(0);
   const [alerts, setAlerts] = useState(false)
+  const [totalPages, setTotalPages] = useState(1)
+  const [currentPage, setCurrectPage] = useState(1)
+  const search = useSearchParams()
+  const limitQuery = search ? search.get('limit') : '3';
+  const currentQuery = search ? search.get('page') : '1';
   const router = useRouter()
-  const getData = async () => {
-    const token = localStorage.getItem('token')
+  const token = localStorage.getItem('token')
+  const getUserInfo = async () => {
     try {
       if (!token) {
         router.push('/')
@@ -38,9 +44,30 @@ export default function page() {
     }
   }
 
+  const getUserEvent = async () => {
+    try {
+      if (!token) {
+        router.push('/')
+      }
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/event/organizer?limit=${encodeURIComponent(limitQuery || '3')}&page=${encodeURIComponent(currentQuery || '1')}`, {
+        method: "GET",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      const res = await response.json()
+      setEvent(res.events)
+      setTotalPages(res.totalPages)
+      setCurrectPage(res.currentPage)
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
-    getData()
-  }, [])
+      getUserInfo()
+      getUserEvent()
+  }, [limitQuery, token, currentQuery])
 
   const onLogout = () => {
     deleteToken('token');
@@ -119,11 +146,14 @@ export default function page() {
                 </Button>
               </div>
             </section>
-            <Collection
-              data={profile?.Event}
+            <EventCollection
+              event={event}
               emptyTitle="No events have been created yet"
               emptyStateSubtext="Go create some now"
               collectionType="Events_Organized"
+              limit={3}
+              page={currentPage}
+              totalPages={totalPages}
             />
           </>
         ) : (
@@ -144,15 +174,6 @@ export default function page() {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-
-            {alerts && (
-              <Alert>
-                <AlertTitle>Verification email has been send</AlertTitle>
-                <AlertDescription>
-                  Check your email to verify!
-                </AlertDescription>
-              </Alert>
-            )}
           </div >
         )
         }

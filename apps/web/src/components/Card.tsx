@@ -19,7 +19,7 @@ export default function Card({ item }: CardProps) {
                 <p className='text-5xl'>{item.discount}%</p>
             </div>
             <div className='flex items-center min-h-[30px] flex-col gap-3 p-5 md:gap-4'>
-                <p>Expire on {formattedDate}</p>
+                <p>Expire on {formattedDate} </p>
                 <Button className='rounded-full w-full' size={"lg"}>
                     <Link href={'/'}>Use now</Link>
                 </Button>

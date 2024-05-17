@@ -174,7 +174,7 @@ export class UserController {
             const user = await prisma.user.findUnique({
                 where: { id: req.user?.id },
                 select: {
-                    id: true, username: true
+                    id: true, username: true, isOrganizer: true
                 }
             })
             res.status(200).json(user)
@@ -282,6 +282,10 @@ export class UserController {
             });
         }
     }
+
+    // user end here
+
+    //organizer start here
 
     async sendEmail(req: Request, res: Response) {
         try {
