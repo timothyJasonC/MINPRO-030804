@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { formatToIDR } from "@/lib/utils"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useContext, useEffect, useState } from "react"
 
 type OrderEventProps = {
@@ -21,8 +22,8 @@ export default function page({ params: { id } }: OrderEventProps) {
   const [discount, setDiscount] = useState<any>('')
   const [totalPrice, setTotalPrice] = useState<number>(0)
   const [semiPrice, setSemiPrice] = useState()
-  const [paymentUrl, setPaymentUrl] = useState('')
   const token = localStorage.getItem('token')
+  const router = useRouter()
 
   const getEvent = async () => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/event/${id}`, {
@@ -88,8 +89,7 @@ export default function page({ params: { id } }: OrderEventProps) {
     const requestData = await response.json()
     console.log(requestData);
 
-    setPaymentUrl(requestData.redirect_url);
-
+    router.push(requestData.redirect_url);
   }
   return (
     <div>
@@ -137,13 +137,7 @@ export default function page({ params: { id } }: OrderEventProps) {
 
           <Button onClick={submitOrder}>Order</Button>
 
-          {paymentUrl ? (
-            <div className="text-black underline">
-              <Link href={paymentUrl}>Klik disini untuk melakukan pembayaran</Link>
-            </div>
-          ) : (
-            null
-          )}
+         
         </div>
 
       </section>
