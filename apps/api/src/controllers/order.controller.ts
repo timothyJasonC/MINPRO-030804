@@ -24,7 +24,7 @@ export class OrderController {
 
     async payment(req: Request, res: Response) {
         try {
-            const { id, productName, price, quantity, discount } = req.body
+            const { id, productName, price, quantity, discount, eventOrganizerId } = req.body
             let disc = 0
             if (discount !== '') {
                 const promo = await prisma.discount.findUnique({
@@ -48,6 +48,7 @@ export class OrderController {
                     totalAmount: totalAmount,
                     eventId: id,
                     userId: req.user?.id,
+                    organizerId: eventOrganizerId
                 }
             })
 

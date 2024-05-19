@@ -30,8 +30,8 @@ export default function page() {
                     <Image
                         src={`${process.env.NEXT_PUBLIC_BASE_API_URL}/${event.imageUrl}`}
                         alt="hero-image"
-                        width={1000}
-                        height={1000}
+                        width={2000}
+                        height={2000}
                         className="h-full min-h-[300px] object-cover object-center"
                     />
 

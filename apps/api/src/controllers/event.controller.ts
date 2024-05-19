@@ -22,6 +22,15 @@ export class EventController {
                 fs.renameSync(path, newPath)
             }
 
+            let total
+            if (price <= 0) {
+                total = 0
+            } else if (price >=0) {
+                total = price
+            } else if (isFree) {
+                total = 0
+            }
+
             const userId = req.user?.id
             if (userId) {
                 const createdEvent = await prisma.event.create({
@@ -34,7 +43,7 @@ export class EventController {
                         organizerId: userId,
                         imageUrl: newPath!,
                         location: req.body.location,
-                        price: price,
+                        price: +total!,
                         isFree: isFree,
                         ticket: ticket
                     }
@@ -123,6 +132,9 @@ export class EventController {
             if (typeof limit !== "string" || isNaN(+limit)) limit = '3'
 
             const events = await prisma.event.findMany({
+                orderBy: [
+                    {id: 'desc'}
+                ],
                 where: {
                     AND: [
                         { category: { name: { contains: category } } },
@@ -234,7 +246,7 @@ export class EventController {
             const totalPages = Math.ceil(totalEvents / +limit)
             const currentPage = +page
 
-            res.status(200).json({ events, totalPages, currentPage })  
+            res.status(200).json({ events, totalPages, currentPage })
         } catch (err) {
             res.status(400).json({
                 status: "error",

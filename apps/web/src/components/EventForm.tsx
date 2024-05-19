@@ -14,6 +14,7 @@ import Image from "next/image";
 import { Checkbox } from "./ui/checkbox";
 import { IEvent } from "@/constants";
 import { useRouter } from "next/navigation";
+import { useToast } from "./ui/use-toast";
 
 type EventFormProps = {
     type: "Create" | "Update";
@@ -24,6 +25,7 @@ export default function EventForm({ type, event }: EventFormProps) {
     const [file, setFiles] = useState<File | null>(null)
     const [startDate, setStartDate] = useState<Date>(new Date());
     const [endDate, setEndDate] = useState<Date>(new Date());
+    const { toast } = useToast()
     const router = useRouter()
     const initialValues = {
         title: "",
@@ -32,7 +34,7 @@ export default function EventForm({ type, event }: EventFormProps) {
         imageUrl: "",
         startDateTime: new Date(),
         endDateTime: new Date(),
-        price: '',
+        price: '0',
         isFree: false,
         categoryId: "",
         ticket: ''
@@ -71,7 +73,17 @@ export default function EventForm({ type, event }: EventFormProps) {
         const info = await response.json()
 
         if (response.ok) {
+            toast({
+                title: "Event has been Created",
+                className: "bg-primary-50 rounded-xl"
+            })
             router.push(`/events/${info.id}`)
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Uh oh! Something went wrong.",
+                description: "There was a problem with your request.",
+            })
         }
     }
 

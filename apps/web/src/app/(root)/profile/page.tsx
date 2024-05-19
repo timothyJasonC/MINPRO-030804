@@ -10,13 +10,14 @@ import Cookies from 'js-cookie'
 import Collection from "@/components/Collection"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import EventCollection from "@/components/EventCollection"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function page() {
   const { setUserInfo } = useContext<any>(UserContext)
   const [profile, setProfile] = useState<any>({})
   const [event, setEvent] = useState<any>({})
+  const { toast } = useToast()
   const [totalPoints, setTotalPoints] = useState<number>(0);
-  const [alerts, setAlerts] = useState(false)
   const [totalPages, setTotalPages] = useState(1)
   const [currentPage, setCurrectPage] = useState(1)
   const search = useSearchParams()
@@ -65,8 +66,8 @@ export default function page() {
   }
 
   useEffect(() => {
-      getUserInfo()
-      getUserEvent()
+    getUserInfo()
+    getUserEvent()
   }, [limitQuery, token, currentQuery])
 
   const onLogout = () => {
@@ -85,7 +86,11 @@ export default function page() {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       if (response.ok) {
-        setAlerts(true)
+        toast({
+          title: "Send Email successful, please verify your account",
+          description: "Check your email to verify your account, after you activate your account, you are an organizer!",
+          className: "bg-primary-50 rounded-xl"
+        })
       }
     } catch (error) {
       console.log(error);

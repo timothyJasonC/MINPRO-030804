@@ -60,7 +60,7 @@ model Event {
   isFree        Boolean  @default(false)
   categoryId    Int
   organizerId   Int
-  ticket        Int?
+  ticket        Int
   user          User     @relation(fields: [organizerId], references: [id])
   category      Category @relation(fields: [categoryId], references: [id])
   Order         Order[]
@@ -76,6 +76,7 @@ model Order {
   id          Int      @id @default(autoincrement())
   userId      Int
   eventId     Int
+  organizerId Int
   totalAmount Int
   createdAt   DateTime @default(now())
   status      Boolean  @default(false)
