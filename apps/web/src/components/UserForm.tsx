@@ -21,8 +21,8 @@ type UserFormProps = {
 export default function UserForm({ type }: UserFormProps) {
     const [error, setError] = useState("")
     const { toast } = useToast()
-const search = useSearchParams()
-const redirect = search.get('redirect')||'/'
+    const search = useSearchParams()
+    const redirect = search.get('redirect') || '/'
 
     const { setUserInfo } = useContext<any>(UserContext)
     const initialValues = userDefaultValues

@@ -78,6 +78,7 @@ model Order {
   eventId     Int
   organizerId Int
   totalAmount Int
+  quantity    Int?     @default(0)
   createdAt   DateTime @default(now())
   status      Boolean  @default(false)
   event       Event    @relation(fields: [eventId], references: [id])

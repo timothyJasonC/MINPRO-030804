@@ -118,4 +118,36 @@ export class OrderController {
         }
     }
 
+    async getUserTicket(req: Request, res: Response) {
+        try {
+            const ticket = await prisma.order.findMany({
+                where: {
+                    userId: req.user?.id,
+                    status: true
+                },
+                include: {
+                    event: {
+                        select: {
+                            title: true,
+                            imageUrl: true
+                        }
+                    }
+                }
+            })
+            res.status(200).json(ticket)
+        } catch (err) {
+            res.json(err)
+        }
+    }
+
+    // async getOrganizerStatusOrder(req:Request, res: Response) {
+    //     try {
+    //         const order = await prisma.order.findMany({
+    //             where: {event: }
+    //         })
+    //     } catch (err) {
+    //         res.json(err)
+            
+    //     }
+    // }
 }

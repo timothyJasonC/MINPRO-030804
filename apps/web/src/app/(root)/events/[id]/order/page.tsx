@@ -22,8 +22,8 @@ export default function page({ params: { id } }: OrderEventProps) {
   const [discount, setDiscount] = useState<any>('')
   const [totalPrice, setTotalPrice] = useState<number>(0)
   const [semiPrice, setSemiPrice] = useState()
-  const router = useRouter()
   const token = localStorage.getItem('token')
+  const router = useRouter()
 
   const getEvent = async () => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/event/${id}`, {

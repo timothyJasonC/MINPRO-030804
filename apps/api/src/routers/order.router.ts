@@ -17,6 +17,7 @@ export class OrderRouter {
     private initializeRoutes(): void {
         this.router.get('/discount',this.userMiddleware.verifyToken, this.orderController.getDiscount)
         this.router.post('/payment',this.userMiddleware.verifyToken, this.orderController.payment)
+        this.router.get('/ticket',this.userMiddleware.verifyToken, this.orderController.getUserTicket)
         this.router.post('/status', this.orderController.checkStatus)
     }
 

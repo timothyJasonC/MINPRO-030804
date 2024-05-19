@@ -58,6 +58,17 @@ export interface IEventUpdate {
   organizerId: number
   user: {username: string}
 }
+
+export interface ITickets {
+  id: number
+  userId: number
+  eventId: number,
+  totalAmount: number
+  createdAt: Date
+  status: boolean
+  quantity: number
+  event: {title: string, imageUrl: string}
+}
 export const eventDefaultValues = {
   title: "",
   description: "",

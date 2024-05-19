@@ -201,7 +201,7 @@ export class UserController {
                     email: true,
                     Point: true,
                     Discount: true,
-                    Event: true
+                    Event: true,
                 }
             })
             res.status(200).json(user)

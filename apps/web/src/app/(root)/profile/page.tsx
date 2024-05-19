@@ -11,10 +11,12 @@ import Collection from "@/components/Collection"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import EventCollection from "@/components/EventCollection"
 import { useToast } from "@/components/ui/use-toast"
+import TicketCollection from "@/components/TicketCollection"
 
 export default function page() {
   const { setUserInfo } = useContext<any>(UserContext)
   const [profile, setProfile] = useState<any>({})
+  const [tickets, setTickets] = useState([])
   const [event, setEvent] = useState<any>({})
   const { toast } = useToast()
   const [totalPoints, setTotalPoints] = useState<number>(0);
@@ -45,6 +47,24 @@ export default function page() {
     }
   }
 
+  const getUserTicket = async () => {
+    try {
+      if (!token) {
+        router.push('/')
+      }
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/order/ticket`, {
+        method: "GET",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      const data = await response.json()
+      setTickets(data)
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const getUserEvent = async () => {
     try {
       if (!token) {
@@ -66,6 +86,7 @@ export default function page() {
   }
 
   useEffect(() => {
+    getUserTicket()
     getUserInfo()
     getUserEvent()
   }, [limitQuery, token, currentQuery])
@@ -137,14 +158,34 @@ export default function page() {
         collectionType="My_Promo"
       />
 
+
+      <section className='max-w-[380px] md:max-w-[800px] mx-auto'>
+        <div className='wrapper flex-wrap gap-4 flex items-center justify-center sm:justify-between'>
+          <h3 className='h3-bold text-center sm:text-left'>My Tickets</h3>
+          <Button asChild size='lg' className='button flex'>
+            <Link href='/#events'>
+              Explore More Events
+            </Link>
+          </Button>
+        </div>
+      </section>
+
+      <TicketCollection
+        ticket={tickets}
+        emptyTitle="No event tickets purchased yet"
+        emptyStateSubtext="No worries - plenty of exciting events to explore!"
+        limit={3}
+        page={currentPage}
+        totalPages={totalPages} />
+
       <section className="py-6">
 
         {profile?.isOrganizer ? (
           <>
             <section className='max-w-[380px] md:max-w-[800px] mx-auto'>
-              <div className='wrapper flex  items-center justify-center sm:justify-between'>
+              <div className='wrapper flex-wrap flex gap-4 items-center justify-center sm:justify-between'>
                 <h3 className='h3-bold text-center sm:text-left'>Events Organized</h3>
-                <Button asChild size='lg' className='button hidden sm:flex'>
+                <Button size='lg' className='button flex'>
                   <Link href='/events/create'>
                     Create New Events
                   </Link>
@@ -160,6 +201,11 @@ export default function page() {
               page={currentPage}
               totalPages={totalPages}
             />
+            <Button size='lg' className='button flex mt-4'>
+              <Link href='/profile/detail'>
+                See Order Details
+              </Link>
+            </Button>
           </>
         ) : (
           <div className='flex-center max-w-[380px] md:max-w-[800px] mx-auto wrapper min-h-[200px] w-full flex-col gap-3 rounded-[14px] bg-grey-50 py-28 text-center'>
