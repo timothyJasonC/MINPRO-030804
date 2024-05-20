@@ -36,8 +36,6 @@ export class OrderController {
             const semiPrice = price * ((100 - disc) / 100)
             const totalAmount = semiPrice * quantity
 
-            // res.json({semiPrice, totalAmount})
-
             const secret = process.env.NEXT_PUBLIC_SECRET as string
             const encededSecret = Buffer.from(secret).toString('base64')
             const basicAuth = `Basic ${encededSecret}`
@@ -48,7 +46,8 @@ export class OrderController {
                     totalAmount: totalAmount,
                     eventId: id,
                     userId: req.user?.id,
-                    organizerId: eventOrganizerId
+                    organizerId: eventOrganizerId,
+                    quantity: quantity
                 }
             })
 
@@ -63,7 +62,8 @@ export class OrderController {
                 ],
                 transaction_details: {
                     order_id: newOrder.id,
-                    gross_amount: totalAmount
+                    gross_amount: totalAmount,
+                    quantity: quantity
                 },
                 expiry: {
                     unit: 'minutes',
@@ -83,8 +83,67 @@ export class OrderController {
             })
             const paymentLink = await response.json()
 
+            if (discount !== '') {
+                await prisma.discount.delete({
+                    where: { id: discount.id }
+                })
+            }
+            const event = await prisma.event.findUnique({
+                where: { id: +id }
+            })
+            if (event) {
+                await prisma.event.update({
+                    where: { id: event.id },
+                    data: { ticket: event.ticket - quantity }
+                })
+            }
+
             res.status(200).json(paymentLink)
 
+        } catch (err) {
+            res.status(400).json({
+                status: "error",
+                message: err
+            });
+        }
+    }
+
+    async freeTicket(req: Request, res: Response) {
+        try {
+            const event = await prisma.event.findUnique({
+                where: {
+                    id: +req.body.id
+                }
+            })
+            const freeTicket = await prisma.order.create({
+                data: {
+                    organizerId: event?.organizerId!,
+                    totalAmount: 0,
+                    quantity: 1,
+                    eventId: +req.body.id,
+                    userId: req.user?.id!,
+                    status: true
+                }
+            })
+            res.json(freeTicket)
+        } catch (err) {
+            res.status(400).json({
+                status: "error",
+                message: err
+            });
+        }
+    }
+
+    async getUserFreeTicket(req: Request, res: Response) {
+        try {
+            const order = await prisma.order.findFirst({
+                where: {
+                    userId: req.user?.id!,
+                    totalAmount: 0,
+                    eventId: +req.body.id
+                }
+            })
+            res.json(order)
         } catch (err) {
             res.status(400).json({
                 status: "error",
@@ -105,11 +164,7 @@ export class OrderController {
                 })
             } else {
                 console.log('gagal');
-
             }
-            // if (req.body.transaction_status == 'settlement') {
-
-            // }
             console.log('abc');
 
             res.json('ok')
@@ -121,6 +176,9 @@ export class OrderController {
     async getUserTicket(req: Request, res: Response) {
         try {
             const ticket = await prisma.order.findMany({
+                orderBy: [
+                    { id: 'desc' }
+                ],
                 where: {
                     userId: req.user?.id,
                     status: true
@@ -140,14 +198,34 @@ export class OrderController {
         }
     }
 
-    // async getOrganizerStatusOrder(req:Request, res: Response) {
-    //     try {
-    //         const order = await prisma.order.findMany({
-    //             where: {event: }
-    //         })
-    //     } catch (err) {
-    //         res.json(err)
-            
-    //     }
-    // }
+    async getOrganizerSales(req: Request, res: Response) {
+        try {
+            const events = await prisma.event.findMany({
+                where: {
+                    organizerId: req.user?.id,
+                    Order: {
+                        some: {}
+                    }
+                },
+                select: {
+                    title: true,
+                    imageUrl: true,
+                    Order: true
+                }
+            })
+
+            const eventsWithTotals = events.map(event => {
+                const totalQuantity = event.Order.reduce((acc, order) => acc + order.quantity!, 0);
+                const totalAmount = event.Order.reduce((acc, order) => acc + order.totalAmount, 0);
+                return {
+                    ...event,
+                    totalQuantity,
+                    totalAmount
+                };
+            })
+            res.json(eventsWithTotals)
+        } catch (err) {
+            res.json(err)
+        }
+    }
 }

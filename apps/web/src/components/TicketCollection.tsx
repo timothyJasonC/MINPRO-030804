@@ -23,7 +23,7 @@ export default function TicketCollection({
         <section className='max-w-[380px] md:max-w-[800px] mx-auto'>
             {ticket && ticket.length > 0 ? (
                 <div className='flex flex-col items-center gap-10 mx-auto'>
-                    <ul className='grid w-full grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:gap-10'>
+                    <ul className='grid w-full grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:gap-10'>
                         {ticket.map((item, idx) => {
                             return (
                                 <li key={idx} className='flex justify-center'>

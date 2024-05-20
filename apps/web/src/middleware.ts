@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 
-const protectedPages = ['/profile', '/profile/edit'];
+const protectedPages = ['/profile', '/profile/edit', '/profile/detail', '/events/create'];
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')  

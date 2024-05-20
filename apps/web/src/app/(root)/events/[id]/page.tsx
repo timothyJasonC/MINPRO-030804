@@ -3,12 +3,16 @@ import { Button } from '@/components/ui/button'
 import { formatDateTime, formatToIDR } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+
 
 export default function page() {
     const { id } = useParams()
     const [event, setEvent] = useState<any>({})
+    const [freeTicketStatus, setFreeticketStatus] = useState(null)
+    const router = useRouter()
     const getEvent = async () => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/event/${id}`, {
             method: 'GET'
@@ -16,12 +20,45 @@ export default function page() {
         if (response.ok) {
             setEvent(await response.json())
         }
-
     }
-    const hasEventFinished = new Date(event.endDateTime) < new Date()
+
+    const getUserFreeTicket = async () => {
+        const token = localStorage.getItem('token')
+        if (token) {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/order/userFreeticket`, {
+                method: 'POST',
+                body: JSON.stringify({ id: id }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            setFreeticketStatus(await response.json())
+        }
+    }
     useEffect(() => {
         getEvent()
+        getUserFreeTicket()
     }, [])
+
+    const getFreeTicket = async () => {
+        const token = localStorage.getItem('token')
+        if (!token) {
+            router.push('/login')
+        }
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/order/freeTicket`, {
+            method: 'POST',
+            body: JSON.stringify({ id: id }),
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        const res = await response.json()
+        console.log(res);
+    }
+
+    const hasEventFinished = new Date(event.endDateTime) < new Date() || event.ticket === 0
 
     return (
         <div>
@@ -58,9 +95,43 @@ export default function page() {
                                     <p className="p-2 text-red-400">Sorry, tickets are no longer available.</p>
                                 ) : (
                                     <>
-                                        <Button type="submit" role="link" size="lg" className="button sm:w-fit">
-                                            <Link href={`/events/${id}/order`}>{event.isFree ? 'Get Ticket' : 'Buy Ticket'}</Link>
-                                        </Button>
+                                        {event.isFree ? (
+                                            <>
+                                                {freeTicketStatus !== null ? (
+                                                    <h1 className='p-2 text-red-400'>you have take this ticket, free ticket just can be take 1 by each other user.</h1>
+                                                ) : (
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger>
+                                                            <Button role="link" size="lg" className="button sm:w-fit">
+                                                                <h1>Get Ticket</h1>
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+
+                                                        <AlertDialogContent className="bg-white">
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>Are you sure you want to take this Ticket?</AlertDialogTitle>
+                                                                <AlertDialogDescription className="p-regular-16 text-grey-600">
+                                                                    Once you take this ticket, it will added to your tickets. and you can't purchased the same ticket again because it's free
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                <AlertDialogAction onClick={getFreeTicket}>
+                                                                    Take
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                )}
+
+                                            </>
+                                        ) : (
+                                            <Button type="submit" role="link" size="lg" className="button sm:w-fit">
+                                                <Link href={`/events/${id}/order`}>{event.isFree ? 'Get Ticket' : 'Buy Ticket'}</Link>
+                                            </Button>
+
+                                        )}
                                     </>
                                 )}
                             </div>

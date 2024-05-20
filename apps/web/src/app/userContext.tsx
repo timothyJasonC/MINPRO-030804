@@ -12,7 +12,6 @@ export function UserContextProvider({ children }: any) {
         const token = localStorage.getItem('token')
         try {
             if (!token) {
-                // router.push('/')
                 return
             }
             // const response = await fetch('http://localhost:8000/api/users/keep-login', {

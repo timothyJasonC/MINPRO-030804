@@ -41,8 +41,8 @@ export interface IEvent {
   isFree: boolean
   categoryId: number
   organizerId: number
-  user: {username: string}
-  category: {name: string}
+  user: { username: string }
+  category: { name: string }
 }
 export interface IEventUpdate {
   id: number
@@ -56,7 +56,7 @@ export interface IEventUpdate {
   isFree: boolean
   categoryId: number
   organizerId: number
-  user: {username: string}
+  user: { username: string }
 }
 
 export interface ITickets {
@@ -67,7 +67,23 @@ export interface ITickets {
   createdAt: Date
   status: boolean
   quantity: number
-  event: {title: string, imageUrl: string}
+  event: { title: string, imageUrl: string }
+}
+export interface ISales {
+  title: string,
+  imageUrl: string,
+  Order: {
+    id: number,
+    userId: number,
+    eventId: number,
+    organizerId: number,
+    totalAmount: number,
+    quantity: number,
+    createdAt: Date,
+    status: boolean
+  }
+  totalQuantity: number;
+  totalAmount: number;
 }
 export const eventDefaultValues = {
   title: "",

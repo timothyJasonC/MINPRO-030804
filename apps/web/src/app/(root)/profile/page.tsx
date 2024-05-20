@@ -124,7 +124,7 @@ export default function page() {
         <h1 className="text-2xl text-center font-semibold">Profile</h1>
         <div className="flex flex-col gap-4 md:gap-8 mt-12">
           <label className="flex flex-col h-32 gap-1 w-32 mx-auto border rounded-full bg-transparent text-xl whitespace-nowrap text-gray-600">
-            <Image src={profile?.image ? `http://localhost:8000/${profile.image}` : "/images/user.png"} alt="user" width={100} height={100} className=" w-32 h-32 object-cover rounded-full" />
+            <Image src={profile?.image ? `http://localhost:8000/${profile.image}` : "/images/user.png"} alt="user" width={1000} height={1000} className=" w-32 h-32 object-cover rounded-full" />
           </label>
           <div className="flex justify-between text-xl">
             <h1 className="font-semibold">Username</h1>
@@ -161,8 +161,8 @@ export default function page() {
 
       <section className='max-w-[380px] md:max-w-[800px] mx-auto'>
         <div className='wrapper flex-wrap gap-4 flex items-center justify-center sm:justify-between'>
-          <h3 className='h3-bold text-center sm:text-left'>My Tickets</h3>
-          <Button asChild size='lg' className='button flex'>
+          <h3 className='h3-bold text-center sm:text-left mx-auto'>My Tickets</h3>
+          <Button asChild size='lg' className='button flex mx-auto'>
             <Link href='/#events'>
               Explore More Events
             </Link>
@@ -183,15 +183,20 @@ export default function page() {
         {profile?.isOrganizer ? (
           <>
             <section className='max-w-[380px] md:max-w-[800px] mx-auto'>
-              <div className='wrapper flex-wrap flex gap-4 items-center justify-center sm:justify-between'>
-                <h3 className='h3-bold text-center sm:text-left'>Events Organized</h3>
-                <Button size='lg' className='button flex'>
+              <div className='wrapper flex-wrap flex gap-4 mx-auto items-center sm:justify-between'>
+                <h3 className='h3-bold text-center sm:text-left mx-auto'>Events Organized</h3>
+                <Button size='lg' className='button flex mx-auto'>
                   <Link href='/events/create'>
                     Create New Events
                   </Link>
                 </Button>
               </div>
             </section>
+            <Button size='lg' className='button flex my-2 mx-auto'>
+              <Link href='/profile/detail'>
+              Sales Details
+              </Link>
+            </Button>
             <EventCollection
               event={event}
               emptyTitle="No events have been created yet"
@@ -201,11 +206,7 @@ export default function page() {
               page={currentPage}
               totalPages={totalPages}
             />
-            <Button size='lg' className='button flex mt-4'>
-              <Link href='/profile/detail'>
-                See Order Details
-              </Link>
-            </Button>
+            
           </>
         ) : (
           <div className='flex-center max-w-[380px] md:max-w-[800px] mx-auto wrapper min-h-[200px] w-full flex-col gap-3 rounded-[14px] bg-grey-50 py-28 text-center'>

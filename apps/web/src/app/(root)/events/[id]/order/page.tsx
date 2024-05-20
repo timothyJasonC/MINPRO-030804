@@ -37,8 +37,11 @@ export default function page({ params: { id } }: OrderEventProps) {
 
   }
   useEffect(() => {
+    if (token === null) {
+      router.push('/profile');
+    }
     getEvent()
-  }, [])
+  }, [userInfo, router])
 
   useEffect(() => {
     if (event.price) {
@@ -135,7 +138,7 @@ export default function page({ params: { id } }: OrderEventProps) {
                 <DropdownDiscount value={discount} onChangeHandler={setDiscount} userId={userInfo.id} token={token} />
               </div>
             </div>
-          <Button onClick={submitOrder}>Order</Button>
+            <Button onClick={submitOrder}>Order</Button>
           </div>
 
 

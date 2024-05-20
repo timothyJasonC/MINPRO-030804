@@ -10,7 +10,7 @@ type CardProps = {
 
 export default function TicketCard({ item }: CardProps) {
     return (
-        <div className='group relative flex min-h-[380px] w-full max-w-[400px] flex-col overflow-hidden rounded-xl bg-white shadow-md transition-all hover:shadow-lg md:min-h-[438px]'>
+        <div className='group relative flex min-h-[380px] w-full flex-col overflow-hidden rounded-xl bg-white shadow-md transition-all hover:shadow-lg md:min-h-[438px]'>
             <Link
                 href={`/events/${item.eventId}`}
                 className='flex-center relative flex-grow bg-gray-50 bg-cover bg-center text-grey-500'>
@@ -22,7 +22,7 @@ export default function TicketCard({ item }: CardProps) {
             >
                 <div className='flex gap-2'>
                     <span className='p-semibold-14 w-min rounded-full bg-grey-500/10  px-4 py-1 text-primary-500'>
-                        {`${formatToIDR(item.totalAmount)}`}
+                       {item.totalAmount === 0 ? 'Free' :  `${formatToIDR(item.totalAmount)}`}
                     </span>
                     <span className='p-semibold-14 w-min rounded-full bg-green-100 px-4 py-1 text-green-600'>
                         {item.status === true ? 'Paid' : 'Pending'}
